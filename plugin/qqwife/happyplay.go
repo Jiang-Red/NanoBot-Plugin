@@ -89,8 +89,9 @@ func init() {
 	})
 	// 单身技能
 	engine.OnMessageRegex(`^(娶|嫁)\s*<@!(\d+)>$`, nano.OnlyChannel, getdb).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *nano.Ctx) {
-		gid := ctx.Message.ChannelID
-		setting, err := wifeData.getSet(gid)
+		cid := ctx.Message.ChannelID
+		gid := ctx.Message.GuildID
+		setting, err := wifeData.getSet(cid)
 		if err != nil {
 			_, _ = ctx.SendPlainMessage(false, "[", getLine(), " ->ERROR]:", err)
 			return
@@ -101,7 +102,7 @@ func init() {
 		}
 		uid := ctx.Message.Author.ID
 		choice := ctx.State["regex_matched"].([]string)[1]
-		cdTime, err := wifeData.checkCD(gid, uid, choice)
+		cdTime, err := wifeData.checkCD(cid, uid, choice)
 		if err != nil {
 			_, _ = ctx.SendPlainMessage(false, "[", getLine(), " ->ERROR]:", err)
 			return
@@ -111,7 +112,7 @@ func init() {
 			return
 		}
 		fiance := ctx.State["regex_matched"].([]string)[2]
-		uInfo, err := wifeData.checkUser(gid, uid)
+		uInfo, err := wifeData.checkUser(cid, uid)
 		if err != nil {
 			_, _ = ctx.SendPlainMessage(false, "[", getLine(), " ->ERROR]:", err)
 			return
@@ -133,7 +134,7 @@ func init() {
 				return
 			}
 		}
-		fInfo, err := wifeData.checkUser(gid, uid)
+		fInfo, err := wifeData.checkUser(cid, uid)
 		if err != nil {
 			_, _ = ctx.SendPlainMessage(false, "[", getLine(), " ->ERROR]:", err)
 			return
@@ -165,7 +166,7 @@ func init() {
 		if uid == fiance { // 如果是自己
 			switch rand.Intn(3) {
 			case 1:
-				err := wifeData.register(gid, uBook, userInfo{})
+				err := wifeData.register(cid, uBook, userInfo{})
 				if err != nil {
 					_, _ = ctx.SendPlainMessage(false, "[", getLine(), " ->ERROR]:", err)
 					return
@@ -197,10 +198,10 @@ func init() {
 		var choicetext string
 		switch choice {
 		case "娶":
-			err = wifeData.register(gid, uBook, fBook)
+			err = wifeData.register(cid, uBook, fBook)
 			choicetext = "\n今天你的群老婆是"
 		default:
-			err = wifeData.register(gid, fBook, uBook)
+			err = wifeData.register(cid, fBook, uBook)
 			choicetext = "\n今天你的群老公是"
 		}
 		if err != nil {
