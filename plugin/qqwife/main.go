@@ -16,7 +16,6 @@ import (
 	"github.com/FloatTech/zbputils/img/text"
 )
 
-
 var (
 	engine = nano.Register("qqwife", &ctrl.Options[*nano.Ctx]{
 		DisableOnDefault: false,
@@ -49,10 +48,11 @@ var (
 
 func init() {
 	engine.OnMessageFullMatch("娶群友", nano.OnlyChannel, getdb).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *nano.Ctx) {
-		gid := ctx.Message.ChannelID
+		gid := ctx.Message.GuildID
+		cid := ctx.Message.ChannelID
 		uid := ctx.Message.Author.ID
 
-		info, err := wifeData.checkUser(gid, uid)
+		info, err := wifeData.checkUser(cid, uid)
 		if err != nil {
 			_, _ = ctx.SendPlainMessage(false, "[", getLine(), " ->ERROR]:", err)
 			return
@@ -82,7 +82,7 @@ func init() {
 			}
 			target := list[rand.Intn(len(list))]
 			if target.ID == uid {
-				err = wifeData.register(gid, uInfo, userInfo{})
+				err = wifeData.register(cid, uInfo, userInfo{})
 				if err != nil {
 					_, _ = ctx.SendPlainMessage(false, "[", getLine(), " ->ERROR]:", err)
 					return
@@ -92,7 +92,7 @@ func init() {
 					_, _ = ctx.SendPlainMessage(false, "[", getLine(), " ->ERROR]: ", err)
 				}
 			}
-			info, err = wifeData.checkUser(gid, target.ID)
+			info, err = wifeData.checkUser(cid, target.ID)
 			if err != nil {
 				_, _ = ctx.SendPlainMessage(false, "[", getLine(), " ->ERROR]:", err)
 				return
@@ -101,7 +101,7 @@ func init() {
 				_, _ = ctx.SendPlainMessage(true, "呜...没娶到，你可以再尝试一次")
 				return
 			}
-			err = wifeData.register(gid, uInfo, target)
+			err = wifeData.register(cid, uInfo, target)
 			if err != nil {
 				_, _ = ctx.SendPlainMessage(false, "[", getLine(), " ->ERROR]:", err)
 				return
